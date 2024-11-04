@@ -2,7 +2,10 @@
 #include <stdlib.h>
 
 typedef struct node {
-    int data;
+    int id;
+    char desc[100];
+    int priority;
+    char date[11];
     struct node *ant;
     struct node *prox;
 } Node;
@@ -19,11 +22,11 @@ void create(ListaCDE *l) {
     l->tam = 0;
 }
 
-int insert(ListaCDE *l, int data) {
+int insert(ListaCDE *l, int id) {
     Node *aux = (Node *) malloc(sizeof(Node));
     if(aux == NULL) return 0;
 
-    aux->data = data;
+    aux->id = id;
     l->tam++;
 
     if(l->inicio == NULL) {
@@ -44,7 +47,7 @@ int insert(ListaCDE *l, int data) {
     return 1;
 }
 
-int removal(ListaCDE *l, int data) {
+int removal(ListaCDE *l, int id) {
     Node *aux;
 
     if(l->inicio == NULL) {
@@ -52,7 +55,7 @@ int removal(ListaCDE *l, int data) {
         return 0;
     }
 
-    if((data == l->inicio->data) && (l->inicio == l->fim)) {
+    if((id == l->inicio->id) && (l->inicio == l->fim)) {
         aux = l->inicio;
         l->inicio = NULL;
         l->fim = NULL;
@@ -62,7 +65,7 @@ int removal(ListaCDE *l, int data) {
         return 1;
     }
 
-    if(data == l->inicio->data) {
+    if(id == l->inicio->id) {
         aux = l->inicio;
         l->inicio = aux->prox;
         l->inicio->ant = l->fim;
@@ -73,7 +76,7 @@ int removal(ListaCDE *l, int data) {
         return 1;
     }
 
-    if(data == l->fim->data) {
+    if(id == l->fim->id) {
         aux = l->fim;
         l->fim = aux->ant;
         l->fim->prox = l->inicio;
@@ -86,12 +89,12 @@ int removal(ListaCDE *l, int data) {
 
     aux = l->inicio->prox;
 
-    while((data != aux->data) && (aux != l->fim)) {
+    while((id != aux->id) && (aux != l->fim)) {
         aux = aux->prox;
     }
 
     if(aux == l->fim) {
-        printf("Elemento %d nao encontrado\n", data);
+        printf("Elemento %d nao encontrado\n", id);
         return 0;
     }
 
@@ -109,11 +112,11 @@ int isEmpty(ListaCDE l) {
 }
 
 int getFirst(ListaCDE l) {
-    return l.inicio->data;
+    return l.inicio->id;
 }
 
 int getLast(ListaCDE l) {
-    return l.fim->data;
+    return l.fim->id;
 }
 
 int getSize(ListaCDE l) {
@@ -130,13 +133,13 @@ void show(ListaCDE l, int sense) {
         if(sense == 1) {
             aux = l.inicio;
             do{
-                printf("Dado: %d\n", aux->data);
+                printf("Dado: %d\n", aux->id);
                 aux = aux->prox;
             } while(aux != l.inicio);
         } else {
             aux = l.fim;
             do {
-                printf("Data: %d\n", aux->data);
+                printf("Data: %d\n", aux->id);
                 aux = aux->ant;
             } while(aux != l.fim);
         }
@@ -149,11 +152,11 @@ int main() {
 
     create(&l);
 
-    sucess = insert(&l, 400);
-    sucess = insert(&l, 240);
-    sucess = insert(&l, 320);
-    sucess = insert(&l, 500);
-    sucess = insert(&l, 600);
+    sucess = insert(&l, 1);
+    sucess = insert(&l, 2);
+    sucess = insert(&l, 3);
+    sucess = insert(&l, 4);
+    sucess = insert(&l, 5);
 
     if(!isEmpty(l)) {
         printf("Deseja ver os dados a partir de onde?\n");

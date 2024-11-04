@@ -1,48 +1,69 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct node {
     int id;
     char desc[100];
-    int priority;
-    char date[11];
+    int priority; // 1 for high, 2 for medium, 3 for low
+    char date[11]; // dd/mm/yyyy
     struct node *ant;
     struct node *prox;
 } Node;
 
 typedef struct list {
-    Node *inicio;
-    Node *fim;
+    Node *start;
+    Node *end;
     int tam;
 } ListaCDE;
 
 void create(ListaCDE *l) {
-    l->inicio = NULL;
-    l->fim = NULL;
+    l->start = NULL;
+    l->end = NULL;
     l->tam = 0;
 }
 
-int insert(ListaCDE *l, int id) {
+int insert(ListaCDE *l, int id, char *desc, int priority, char *date) {
     Node *aux = (Node *) malloc(sizeof(Node));
     if(aux == NULL) return 0;
 
     aux->id = id;
+    aux->priority = priority;
+    strcpy(aux->desc, desc);
+    strcpy(aux->date, date);
+
     l->tam++;
 
-    if(l->inicio == NULL) {
-        l->inicio = aux;
-        l->fim = aux;
-        aux->prox = l->inicio;
-        aux->ant = l->fim;
+    if(l->start == NULL) {
+        l->start = aux;
+        l->end = aux;
+        aux->prox = l->start;
+        aux->ant = l->end;
 
         return 1;
     }
 
-    aux->prox = l->inicio;
-    aux->ant = l->fim;
-    l->fim->prox = aux;
-    l->fim = aux;
-    l->inicio->ant = l->fim;
+    Node *current = l->start;
+    do {
+        if(current->priority > aux->priority) {
+            aux->prox = current;
+            aux->ant = current->ant;
+            current->ant->prox = aux;
+            current->ant = aux;
+
+            if(current == l->start) l->start = aux;
+
+            return 1;
+        }
+
+        current = current->prox;
+    } while(current != l->start);
+
+    aux->prox = l->start;
+    aux->ant = l->end;
+    l->end->prox = aux;
+    l->end = aux;
+    l->start->ant = l->end;
 
     return 1;
 }
@@ -50,50 +71,50 @@ int insert(ListaCDE *l, int id) {
 int removal(ListaCDE *l, int id) {
     Node *aux;
 
-    if(l->inicio == NULL) {
+    if(l->start == NULL) {
         printf("Lista vazia\n");
         return 0;
     }
 
-    if((id == l->inicio->id) && (l->inicio == l->fim)) {
-        aux = l->inicio;
-        l->inicio = NULL;
-        l->fim = NULL;
+    if((id == l->start->id) && (l->start == l->end)) {
+        aux = l->start;
+        l->start = NULL;
+        l->end = NULL;
         free(aux);
         l->tam--;
 
         return 1;
     }
 
-    if(id == l->inicio->id) {
-        aux = l->inicio;
-        l->inicio = aux->prox;
-        l->inicio->ant = l->fim;
-        l->fim->prox = l->inicio;
+    if(id == l->start->id) {
+        aux = l->start;
+        l->start = aux->prox;
+        l->start->ant = l->end;
+        l->end->prox = l->start;
         free(aux);
         l->tam--;
 
         return 1;
     }
 
-    if(id == l->fim->id) {
-        aux = l->fim;
-        l->fim = aux->ant;
-        l->fim->prox = l->inicio;
-        l->inicio->ant = l->fim;
+    if(id == l->end->id) {
+        aux = l->end;
+        l->end = aux->ant;
+        l->end->prox = l->start;
+        l->start->ant = l->end;
         free(aux);
         l->tam--;
 
         return 1;
     }
 
-    aux = l->inicio->prox;
+    aux = l->start->prox;
 
-    while((id != aux->id) && (aux != l->fim)) {
+    while((id != aux->id) && (aux != l->end)) {
         aux = aux->prox;
     }
 
-    if(aux == l->fim) {
+    if(aux == l->end) {
         printf("Elemento %d nao encontrado\n", id);
         return 0;
     }
@@ -107,16 +128,16 @@ int removal(ListaCDE *l, int id) {
 }
 
 int isEmpty(ListaCDE l) {
-    if(l.inicio == NULL) return 1;
+    if(l.start == NULL) return 1;
     return 0;
 }
 
 int getFirst(ListaCDE l) {
-    return l.inicio->id;
+    return l.start->id;
 }
 
 int getLast(ListaCDE l) {
-    return l.fim->id;
+    return l.end->id;
 }
 
 int getSize(ListaCDE l) {
@@ -126,22 +147,30 @@ int getSize(ListaCDE l) {
 void show(ListaCDE l, int sense) {
     Node *aux;
 
-    if(l.inicio == NULL) {
+    if(l.start == NULL) {
         printf("Lista vazia\n");
         return;
     } else {
         if(sense == 1) {
-            aux = l.inicio;
+            aux = l.start;
             do{
-                printf("Dado: %d\n", aux->id);
+                printf("Mostrando a lista: \n");
+                printf("ID: %d\n", aux->id);
+                printf("Prioridade: %d\n", aux->priority);
+                printf("Descricao: %s\n", aux->desc);
+                printf("Data de entrega: %s\n", aux->date);
                 aux = aux->prox;
-            } while(aux != l.inicio);
+            } while(aux != l.start);
         } else {
-            aux = l.fim;
+            aux = l.end;
             do {
-                printf("Data: %d\n", aux->id);
+                printf("Mostrando a lista: \n");
+                printf("ID: %d\n", aux->id);
+                printf("Prioridade: %d\n", aux->priority);
+                printf("Descricao: %s\n", aux->desc);
+                printf("Data de entrega: %s\n", aux->date);
                 aux = aux->ant;
-            } while(aux != l.fim);
+            } while(aux != l.end);
         }
     }
 }
@@ -152,16 +181,15 @@ int main() {
 
     create(&l);
 
-    sucess = insert(&l, 1);
-    sucess = insert(&l, 2);
-    sucess = insert(&l, 3);
-    sucess = insert(&l, 4);
-    sucess = insert(&l, 5);
+    sucess = insert(&l, 1, "Teste 1", 1, "01/01/2021");
+    sucess = insert(&l, 2, "Teste 2", 1, "01/01/2021");
+    sucess = insert(&l, 3, "Teste 3", 1, "01/01/2021");
+    sucess = insert(&l, 4, "Teste 4", 1, "01/01/2021");
 
     if(!isEmpty(l)) {
         printf("Deseja ver os dados a partir de onde?\n");
-        printf("1 - Inicio\n");
-        printf("2 - Fim\n");
+        printf("1 - start\n");
+        printf("2 - end\n");
         printf("-> ");
         scanf("%d", &option);
 
